@@ -1,3 +1,5 @@
+# src/widget.py
+
 def mask_account_card(info):
     """
     Функция для маскировки номера карты или счета.
@@ -12,8 +14,7 @@ def mask_account_card(info):
     card_type = " ".join(parts[:-1])
     number = parts[-1]
 
-    # Маскируем номер карты
-    if card_type.lower() in ["visa", "mastercard", "maestro"]:
+    if card_type.lower() in ["visa", "mastercard", "maestro"]:  # Добавьте другие типы карт по необходимости
         return f"{card_type} {number[:4]} {number[4:6]}** **** {number[-4:]}"
     elif card_type.lower() == "счет":
         return f"{card_type} **{number[-4:]}"
@@ -39,6 +40,6 @@ def get_date(date_str):
 
 # Примеры использования функций
 if __name__ == "__main__":
-    print(mask_account_card("Visa Platinum 7000792289606361"))  # Вывод: Visa Platinum 7000 79** **** 6361
+    print(mask_account_card("Visa 7000792289606361"))  # Вывод: Visa 7000 79** **** 6361
     print(mask_account_card("Счет 73654108430135874305"))  # Вывод: Счет **4305
     print(get_date("2024-03-11T02:26:18.671407"))  # Вывод: 11.03.2024
