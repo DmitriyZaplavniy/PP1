@@ -1,6 +1,6 @@
-# src/widget.py
+from src.masks.masks import get_mask_card_number, get_mask_account  # Предполагаем, что эти функции уже реализованы в masks.py
 
-def mask_account_card(info):
+def mask_account_card(info: str) -> str:
     """
     Функция для маскировки номера карты или счета.
 
@@ -10,19 +10,28 @@ def mask_account_card(info):
     Возвращает:
     str - строка с замаскированным номером.
     """
-    parts = info.split()
-    card_type = " ".join(parts[:-1])
-    number = parts[-1]
+    parts = info.rsplit(' ', 1)  # Разделяем строку на две части: все до последнего пробела и последнее слово
+    if len(parts) != 2:
+        raise ValueError("Некорректный формат входных данных")
 
+    card_type = parts[0]  # Все, что до последнего пробела, считается типом карты
+    number_str = parts[1]  # Последнее слово - это номер карты или счета
+
+    try:
+        number = int(number_str)  # Преобразуем номер в целое число
+    except ValueError:
+        raise ValueError("Номер карты или счета должен быть числом")
+
+    # Проверка типа карты и вызов соответствующей функции маскировки
     if card_type.lower() in ["visa", "mastercard", "maestro"]:  # Добавьте другие типы карт по необходимости
-        return f"{card_type} {number[:4]} {number[4:6]}** **** {number[-4:]}"
+        return get_mask_card_number(number)
     elif card_type.lower() == "счет":
-        return f"{card_type} **{number[-4:]}"
+        return get_mask_account(number)
     else:
         raise ValueError("Неизвестный тип карты или счета")
 
 
-def get_date(date_str):
+def get_date(date_str: str) -> str:
     """
     Функция для преобразования даты из формата ISO в формат ДД.ММ.ГГГГ.
 
@@ -39,7 +48,7 @@ def get_date(date_str):
 
 
 # Примеры использования функций
-if __name__ == "__main__":
-    print(mask_account_card("Visa 7000792289606361"))  # Вывод: Visa 7000 79** **** 6361
+if __name__ == "__main__":  # Исправлено
+    print(mask_account_card("Visa Classic 7000792289606361"))  # Пример с несколькими словами
     print(mask_account_card("Счет 73654108430135874305"))  # Вывод: Счет **4305
     print(get_date("2024-03-11T02:26:18.671407"))  # Вывод: 11.03.2024
