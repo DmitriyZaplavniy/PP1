@@ -1,34 +1,43 @@
-from src.masks.masks import get_mask_card_number, get_mask_account  # Предполагаем, что эти функции уже реализованы в masks.py
+import sys
+import os
+
+# Добавляем путь к src в sys.path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))  # Исправлено: __file__ вместо file
+
+from src.masks.masks import get_mask_card_number, get_mask_account
+
 
 def mask_account_card(info: str) -> str:
     """
-    Функция для маскировки номера карты или счета.
+    Маскирует номер карты или счета.
 
     Аргументы:
-    info: str - строка с типом и номером карты или счета.
+    info: str - строка вида "Тип Номер".
 
     Возвращает:
     str - строка с замаскированным номером.
     """
-    parts = info.rsplit(' ', 1)  # Разделяем строку на две части: все до последнего пробела и последнее слово
-    if len(parts) != 2:
-        raise ValueError("Некорректный формат входных данных")
-
-    card_type = parts[0]  # Все, что до последнего пробела, считается типом карты
-    number_str = parts[1]  # Последнее слово - это номер карты или счета
-
+    # Разделяем строку на тип и номер
     try:
-        number = int(number_str)  # Преобразуем номер в целое число
+        card_type, number_str = info.rsplit(" ", 1)
     except ValueError:
-        raise ValueError("Номер карты или счета должен быть числом")
+        raise ValueError("Некорректный формат данных. Ожидается: 'Тип Номер'.")
 
-    # Проверка типа карты и вызов соответствующей функции маскировки
-    if card_type.lower() in ["visa", "mastercard", "maestro"]:  # Добавьте другие типы карт по необходимости
-        return get_mask_card_number(number)
-    elif card_type.lower() == "счет":
-        return get_mask_account(number)
+    # Проверяем, что номер состоит только из цифр
+    if not number_str.isdigit():
+        raise ValueError("Номер должен содержать только цифры.")
+
+    # Проверяем длину номера
+    if card_type.lower() == "счет":
+        if len(number_str) < 10:
+            raise ValueError("Номер счета должен содержать не менее 10 цифр.")
+        mask = get_mask_account(int(number_str))
     else:
-        raise ValueError("Неизвестный тип карты или счета")
+        if len(number_str) < 13:
+            raise ValueError("Номер карты должен содержать не менее 13 цифр.")
+        mask = get_mask_card_number(int(number_str))
+
+    return f"{card_type} {mask}"
 
 
 def get_date(date_str: str) -> str:
@@ -48,7 +57,8 @@ def get_date(date_str: str) -> str:
 
 
 # Примеры использования функций
-if __name__ == "__main__":  # Исправлено
-    print(mask_account_card("Visa Classic 7000792289606361"))  # Пример с несколькими словами
-    print(mask_account_card("Счет 73654108430135874305"))  # Вывод: Счет **4305
-    print(get_date("2024-03-11T02:26:18.671407"))  # Вывод: 11.03.2024
+if __name__ == "__main__":  # Исправлено здесь
+    print(mask_account_card("Visa 7000792289606362"))  # Пример с картой
+    print(mask_account_card("Счет 73654108430135874305"))  # Пример с номером счета
+    print(get_date("2024-03-11T02:26:18.671407"))  # Пример преобразования даты
+
