@@ -1,12 +1,3 @@
-import sys
-import os
-
-# Добавляем путь к src в sys.path
-sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))  # Исправлено: __file__ вместо file
-
-from src.masks.masks import get_mask_card_number, get_mask_account
-
-
 def mask_account_card(info: str) -> str:
     """
     Маскирует номер карты или счета.
@@ -31,13 +22,41 @@ def mask_account_card(info: str) -> str:
     if card_type.lower() == "счет":
         if len(number_str) < 10:
             raise ValueError("Номер счета должен содержать не менее 10 цифр.")
-        mask = get_mask_account(int(number_str))
+        mask = get_mask_account(number_str)  # Оставляем как строку
     else:
-        if len(number_str) < 13:
-            raise ValueError("Номер карты должен содержать не менее 13 цифр.")
-        mask = get_mask_card_number(int(number_str))
+        if len(number_str) < 13 or len(number_str) > 19:
+            raise ValueError("Номер карты должен содержать от 13 до 19 цифр.")
+        mask = get_mask_card_number(number_str)  # Оставляем как строку
 
     return f"{card_type} {mask}"
+
+
+def get_mask_account(number_str: str) -> str:
+    """
+    Маскирует номер счета, оставляя только последние 4 цифры.
+
+    Аргументы:
+    number_str: str - строка с номером счета.
+
+    Возвращает:
+    str - строка с замаскированным номером счета.
+    """
+    masked_length = len(number_str) - 4
+    masked_part = '*' * masked_length
+    return masked_part + number_str[-4:]
+
+
+def get_mask_card_number(number_str: str) -> str:
+    """
+    Маскирует номер карты, оставляя только последние 4 цифры.
+
+    Аргументы:
+    number_str: str - строка с номером карты.
+
+    Возвращает:
+    str - строка с замаскированным номером карты.
+    """
+    return '*' * (len(number_str) - 4) + number_str[-4:]
 
 
 def get_date(date_str: str) -> str:
@@ -61,4 +80,3 @@ if __name__ == "__main__":  # Исправлено здесь
     print(mask_account_card("Visa 7000792289606362"))  # Пример с картой
     print(mask_account_card("Счет 73654108430135874305"))  # Пример с номером счета
     print(get_date("2024-03-11T02:26:18.671407"))  # Пример преобразования даты
-
