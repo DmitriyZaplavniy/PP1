@@ -1,21 +1,55 @@
+import unittest
+from unittest.mock import mock_open, patch
+
 from src.utils import read_json_file
-from src.external_api import convert_to_rub
+
+from src.external_api import convert_currency
 
 
-def main():
-    transactions = read_json_file('data/operations.json')
+class TestReadJsonFile(unittest.TestCase):
 
-    for transaction in transactions:
-        amount = transaction.get('amount')
-        currency = transaction.get('currency')
+    @patch('builtins.open', new_callable=mock_open, read_data='[{"amount": 100, "currency": "USD"}]')
+    def test_read_json_file_valid(self, mock_file):
+        result = read_json_file('data/operations.json')
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['amount'], 100)
 
-        if amount is not None and currency is not None:
-            try:
-                amount_in_rub = convert_to_rub(amount, currency)
-                print(f"Сумма транзакции: {amount_in_rub} RUB")
-            except Exception as e:
-                print(f"Ошибка конвертации: {e}")
+    @patch('os.path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open, read_data='')
+    def test_read_json_file_empty(self, mock_file, mock_exists):
+        result = read_json_file('data/operations.json')
+        self.assertEqual(result, [])
+
+    @patch('os.path.exists', return_value=False)
+    def test_read_json_file_not_found(self, mock_exists):
+        result = read_json_file('data/operations.json')
+        self.assertEqual(result, [])
 
 
-if __name__ == "__main__":
-    main()
+# test_external_api.py
+class TestConvertCurrency(unittest.TestCase):
+
+    @patch('src.external_api.requests.get')
+    @patch('os.getenv', return_value='test_api_key')
+    def test_convert_currency_usd(self, mock_getenv, mock_get):
+        mock_get.return_value.json.return_value = {'rates': {'RUB': 75.0}}
+        transaction = {'amount': 100, 'currency': 'USD'}
+        result = convert_currency(transaction)
+        self.assertAlmostEqual(result, 7500.0)
+
+    @patch('src.external_api.requests.get')
+    @patch('os.getenv', return_value='test_api_key')
+    def test_convert_currency_eur(self, mock_getenv, mock_get):
+        mock_get.return_value.json.return_value = {'rates': {'RUB': 90.0}}
+        transaction = {'amount': 100, 'currency': 'EUR'}
+        result = convert_currency(transaction)
+        self.assertAlmostEqual(result, 9000.0)
+
+    def test_convert_currency_rub(self):
+        transaction = {'amount': 100, 'currency': 'RUB'}
+        result = convert_currency(transaction)
+        self.assertEqual(result, 100.0)
+
+
+if __name__ == '__main__':
+    unittest.main()

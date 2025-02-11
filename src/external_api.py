@@ -1,21 +1,31 @@
+import os
+
 import requests
+from dotenv import load_dotenv
 
-API_KEY = "KOf4uCHOu9knq4AlkUEnEHAsf8qYdVGa"  # Замените на ваш ключ API
-BASE_URL = 'https://api.apilayer.com/exchangerates_data'
+load_dotenv()
 
 
-def convert_to_rub(amount, currency):
-    if currency == "RUB":
+def convert_currency(transaction):
+    """Конвертирует сумму транзакции в рубли, если валюта USD или EUR."""
+    amount = transaction.get('amount')
+    currency = transaction.get('currency')
+
+    if currency not in ['USD', 'EUR']:
         return float(amount)
 
-    response = requests.get(f"{BASE_URL}/latest?base={currency}&apikey={API_KEY}")
+    api_key = os.getenv('API_KEY')  # Получение API-ключа из переменной окружения
+    url = f"https://api.apilayer.com/exchangerates_data/latest?base={currency}&symbols=RUB"
 
-    if response.status_code != 200:
-        raise Exception("Ошибка при обращении к API.")
+    headers = {
+        "apikey": api_key
+    }
 
-    rates = response.json().get('rates', {})
+    response = requests.get(url, headers=headers)
+    data = response.json()
 
-    if 'RUB' in rates:
-        return float(amount) * rates['RUB']
-    else:
-        raise ValueError("Курс валюты не найден.")
+    if 'error' in data:
+        raise Exception("Ошибка получения данных о курсе валют")
+
+    rate = data['rates']['RUB']
+    return float(amount) * rate
