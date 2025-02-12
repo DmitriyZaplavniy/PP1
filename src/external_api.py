@@ -1,15 +1,10 @@
+import requests
 import os
 
-import requests
-from dotenv import load_dotenv
 
-load_dotenv()
-
-
-def convert_currency(transaction):
+def convert_currency(transaction, currency):
     """Конвертирует сумму транзакции в рубли, если валюта USD или EUR."""
     amount = transaction.get('amount')
-    currency = transaction.get('currency')
 
     if currency not in ['USD', 'EUR']:
         return float(amount)
@@ -22,6 +17,10 @@ def convert_currency(transaction):
     }
 
     response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        raise Exception("Ошибка получения данных о курсе валют")
+
     data = response.json()
 
     if 'error' in data:
@@ -29,3 +28,4 @@ def convert_currency(transaction):
 
     rate = data['rates']['RUB']
     return float(amount) * rate
+
