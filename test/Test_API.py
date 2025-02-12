@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import mock_open, patch
 
 from src.utils import read_json_file
-
 from src.external_api import convert_currency
 
 
@@ -26,28 +25,29 @@ class TestReadJsonFile(unittest.TestCase):
         self.assertEqual(result, [])
 
 
-# test_external_api.py
 class TestConvertCurrency(unittest.TestCase):
 
     @patch('src.external_api.requests.get')
     @patch('os.getenv', return_value='test_api_key')
     def test_convert_currency_usd(self, mock_getenv, mock_get):
+        mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = {'rates': {'RUB': 75.0}}
-        transaction = {'amount': 100, 'currency': 'USD'}
-        result = convert_currency(transaction)
+        transaction = {'amount': 100}
+        result = convert_currency(transaction, 'USD')
         self.assertAlmostEqual(result, 7500.0)
 
     @patch('src.external_api.requests.get')
     @patch('os.getenv', return_value='test_api_key')
     def test_convert_currency_eur(self, mock_getenv, mock_get):
+        mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = {'rates': {'RUB': 90.0}}
-        transaction = {'amount': 100, 'currency': 'EUR'}
-        result = convert_currency(transaction)
+        transaction = {'amount': 100}
+        result = convert_currency(transaction, 'EUR')
         self.assertAlmostEqual(result, 9000.0)
 
     def test_convert_currency_rub(self):
-        transaction = {'amount': 100, 'currency': 'RUB'}
-        result = convert_currency(transaction)
+        transaction = {'amount': 100}
+        result = convert_currency(transaction, 'RUB')
         self.assertEqual(result, 100.0)
 
 
