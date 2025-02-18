@@ -13,3 +13,16 @@
 
 1. **Клонирование репозитория**:
    Откройте терминал и выполните команду:
+## Новая функциональность
+
+Теперь проект поддерживает чтение финансовых транзакций из файлов формата CSV и Excel (XLSX).
+
+### Использование
+
+Для чтения транзакций из CSV:
+python
+transactions = readtransactionsfrom_csv('path/to/transactions.csv')
+
+Для чтения транзакций из Excel:
+python
+transactions = readtransactionsfromexcel('path/to/transactionsexcel.xlsx')
