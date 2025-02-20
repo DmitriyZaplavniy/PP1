@@ -1,0 +1,30 @@
+[
+    {
+        "date": "08.12.2019",
+        "description": "Открытие вклада",
+        "amount": 40542,
+        "currency": "RUB",
+        "status": "EXECUTED"
+    },
+    {
+        "date": "12.11.2019",
+        "description": "Перевод с карты на карту",
+        "amount": 130,
+        "currency": "USD",
+        "status": "EXECUTED"
+    },
+    {
+        "date": "18.07.2018",
+        "description": "Перевод организации",
+        "amount": 8390,
+        "currency": "RUB",
+        "status": "CANCELED"
+    },
+    {
+        "date": "03.06.2018",
+        "description": "Перевод со счета на счет",
+        "amount": 8200,
+        "currency": "EUR",
+        "status": "PENDING"
+    }
+]
